@@ -6,3 +6,15 @@ output: github_document
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r initial}
+library(tidyverse)
+```
+
+## Problem 2
+
+```{r}
+homicides = read_csv("data/homicide-data.csv") %>%
+  mutate(city_state = str_c(city, ", ", state)) %>%
+  relocate(city_state, .after = state)
+```
