@@ -13,8 +13,16 @@ library(tidyverse)
 
 ## Problem 2
 
-```{r}
+```{r summary}
 homicides = read_csv("data/homicide-data.csv") %>%
-  mutate(city_state = str_c(city, ", ", state)) %>%
-  relocate(city_state, .after = state)
+  mutate(city_state = str_c(city, ", ", state),
+         unsol_hm = ifelse(disposition == "Closed without arrest" | disposition == "Open/No arrest", TRUE, FALSE)) %>%
+  relocate(city_state, .after = state) %>%
+  group_by(city_state) %>%
+  summarise(tot_hm = n_distinct(uid),
+        tot_unsol_hm = n_distinct(uid[unsol_hm == TRUE]))
+
+# sum(homicides$tot_hm) # 52,179
+# sum(homicides$tot_unsol_hm) # 26,505
 ```
+
