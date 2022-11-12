@@ -3,13 +3,14 @@ title: "Homework 5"
 output: github_document
 ---
 
-```{r setup, include = FALSE}
+```{r setup, include = FALSE, message = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r initial}
+```{r initial, message = FALSE}
 library(tidyverse)
 library(ggplot2)
+library(patchwork)
 ```
 
 ## Problem 2
@@ -71,12 +72,78 @@ hm_listcol %>%
   ggplot(aes(x = city_state, y = estimate, color = city_state)) +
   geom_point() +
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
-  labs(title = "Estimates and Confidence Intervals for Proportions of Unsolved Homicides, by City",
+  labs(title = "Estimates and confidence intervals for proportions of unsolved homicides, by city",
        x = "City",
-       y = "Share of Unsolved Homicides"
+       y = "Estimated share of unsolved homicides"
   ) +
   theme(legend.position = "none",
-        plot.title = element_text(size = 12, hjust = 0.5),
+        plot.title = element_text(size = 11, hjust = 0.5),
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+## Problem 3
+
+```{r sim}
+sim = function(n = 30, mu = 0, sigma = 5) {
+  
+  sim_data = tibble(x = rnorm(n, mean = mu, sd = sigma))
+  
+  sim_data %>%
+    t.test(mu = 0) %>%
+    broom::tidy() %>%
+    select(estimate, p.value)
+}
+
+sim(mu = 5)
+
+sim_results = 
+  tibble(mean = c(0, 1, 2, 3, 4, 5, 6)) %>% 
+  mutate(output_lists = map(.x = mean, ~rerun(5000, sim(mu = .x))),
+    estimate_dfs = map(output_lists, bind_rows)) %>% 
+  select(-output_lists) %>% 
+  unnest(estimate_dfs) %>%
+  mutate(reject_null = ifelse(p.value < 0.05, TRUE, FALSE))
+```
+
+```{r sim_plot_i, fig.width = 9, fig.asp = 0.6}
+sim_results %>%
+  group_by(mean) %>%
+  summarise(prop_null_reject = sum(reject_null) / n()) %>%
+  ggplot(aes(x = mean, y = prop_null_reject)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Relationship between effect size and power",
+       x = "Population mean",
+       y = "Proportion of times null is rejected") +
+  theme(plot.title = element_text(size = 11))
+```
+
+```{r sim_plot_ii, fig.width = 9, fig.asp = 0.6}
+est_mu = sim_results %>%
+  group_by(mean) %>%
+  summarise(avg_est_mu = mean(estimate)) %>%
+  ggplot(aes(x = mean, y = avg_est_mu)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Population vs. average estimated mean",
+       x = "Population mean",
+       y = "Average estimate of mean") +
+  theme(plot.title = element_text(size = 11))
+
+est_mu_null_reject = sim_results %>%
+  filter(reject_null == TRUE) %>%
+  group_by(mean) %>%
+  summarise(avg_est_mu = mean(estimate)) %>%
+  ggplot(aes(x = mean, y = avg_est_mu)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Population vs. average estimated mean (H0 rejected)",
+       x = "Population mean",
+       y = "Average estimate of mean (H0 rejected)") +
+  theme(plot.title = element_text(size = 11))
+
+est_mu + est_mu_null_reject
+```
+
+
 
