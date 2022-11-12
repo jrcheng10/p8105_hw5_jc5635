@@ -9,20 +9,74 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r initial}
 library(tidyverse)
+library(ggplot2)
 ```
 
 ## Problem 2
 
-```{r summary}
+```{r hm_summary}
 homicides = read_csv("data/homicide-data.csv") %>%
   mutate(city_state = str_c(city, ", ", state),
-         unsol_hm = ifelse(disposition == "Closed without arrest" | disposition == "Open/No arrest", TRUE, FALSE)) %>%
+         city_state = recode(city_state, "Tulsa, AL" = "Tulsa, OK"),
+         unsol_hm = ifelse(disposition == "Closed without arrest" | disposition == "Open/No arrest", TRUE, FALSE)
+         ) %>%
   relocate(city_state, .after = state) %>%
+  
   group_by(city_state) %>%
   summarise(tot_hm = n_distinct(uid),
         tot_unsol_hm = n_distinct(uid[unsol_hm == TRUE]))
+```
 
-# sum(homicides$tot_hm) # 52,179
-# sum(homicides$tot_unsol_hm) # 26,505
+```{r hm_baltimore}
+balt_tot = homicides %>%
+  filter(city_state == "Baltimore, MD") %>%
+  pull(tot_hm)
+
+balt_unsol = homicides %>%
+  filter(city_state == "Baltimore, MD") %>%
+  pull(tot_unsol_hm)
+
+prop.test(x = balt_unsol, 
+          n = balt_tot) %>%
+  broom::tidy() %>%
+  select(estimate, starts_with("conf")) 
+```
+
+```{r hm_all_cities}
+prop_unsol = function(city) {
+  
+  tot = homicides %>%
+    filter(city_state == city) %>%
+    pull(tot_hm)
+  
+  unsol = homicides %>%
+    filter(city_state == city) %>%
+    pull(tot_unsol_hm)
+  
+  prop.test(x = unsol, 
+            n = tot) %>%
+    broom::tidy() %>%
+    select(estimate, starts_with("conf"))
+ 
+}
+
+hm_listcol = homicides %>% 
+  mutate(summary = map(city_state, prop_unsol)) %>%
+  unnest(summary)
+```
+
+```{r hm_plot, fig.width = 9, fig.asp = 0.6}
+hm_listcol %>% 
+  mutate(city_state = fct_reorder(city_state, estimate)) %>%
+  ggplot(aes(x = city_state, y = estimate, color = city_state)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  labs(title = "Estimates and Confidence Intervals for Proportions of Unsolved Homicides, by City",
+       x = "City",
+       y = "Share of Unsolved Homicides"
+  ) +
+  theme(legend.position = "none",
+        plot.title = element_text(size = 12, hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
