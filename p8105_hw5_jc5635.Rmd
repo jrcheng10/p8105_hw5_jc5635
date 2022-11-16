@@ -13,7 +13,7 @@ library(patchwork)
 
 ## Problem 1
 
-We first read and save raw data in a wide-format dataframe (i.e. as `r df`), with associated file names and paths included.
+We first read and save raw data in a wide-format dataframe (i.e. as `df`), with associated file names and paths included.
 
 ```{r long_study_read}
 df = tibble(files = list.files("data/prob_1/"),
