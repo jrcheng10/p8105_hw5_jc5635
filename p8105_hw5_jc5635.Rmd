@@ -65,7 +65,7 @@ homicides = read_csv("data/homicide-data.csv") %>%
         tot_unsol_hm = n_distinct(uid[unsol_hm == TRUE]))
 ```
 
-We report the estimated proportion of unsolved homicides, and corresponding confidence intervals, for Baltimore, MD,  the `prop.test` function t
+We report the estimated proportion of unsolved homicides, and corresponding confidence intervals, for Baltimore, MD.
 
 ```{r hm_baltimore, message = FALSE}
 balt_tot = homicides %>%
@@ -81,6 +81,8 @@ prop.test(x = balt_unsol,
   broom::tidy() %>%
   select(estimate, starts_with("conf")) 
 ```
+
+Next, we report the estimated proportions of unsolved homicides and corresponding confidence for all cities in the `homicides` dataset.
 
 ```{r hm_all_cities}
 prop_unsol = function(city) {
@@ -105,6 +107,8 @@ hm_listcol = homicides %>%
   unnest(summary)
 ```
 
+Lastly, we plot estimated proportions of unsolved homicides and confidence intervals by city.
+
 ```{r hm_plot, fig.width = 9, fig.asp = 0.6}
 hm_listcol %>% 
   mutate(city_state = fct_reorder(city_state, estimate)) %>%
@@ -116,7 +120,7 @@ hm_listcol %>%
        y = "Estimated share of unsolved homicides"
   ) +
   theme(legend.position = "none",
-        plot.title = element_text(size = 11, hjust = 0.5),
+        plot.title = element_text(size = 11),
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
