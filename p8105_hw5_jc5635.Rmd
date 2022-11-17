@@ -13,7 +13,7 @@ library(patchwork)
 
 ## Problem 1
 
-We first read and save raw data in a wide-format dataframe (i.e. as `df`), with associated file names and paths included.
+We first read and save raw data in wide format (i.e. as `df`), with associated file names and paths included.
 
 ```{r long_study_read, message = FALSE}
 df = tibble(files = list.files("data/prob_1/"),
@@ -51,9 +51,9 @@ Outcomes appear to trend higher over time for participants in the experimental g
 
 We import `homicides` data from The Washington Post, consisting of 52,179 records on 12 variables, encompassing fields denoting the identities (e.g. `victim_last`) and characteristics (e.g. `victim_age`) of murder victims, as well as other homicide-related details (e.g. `reported_date`) and case statuses (i.e. `disposition`).
 
-We tidy `homicides` data by concatenating `city` and `state` into a `city_state` field, recoding incorrectly recorded values where relevant, creating a new `unsol_hm` field for unsolved homicides, and then summarizing counts of total and unsolved homicides by city.
+We tidy `homicides` data by concatenating `city` and `state` into a `city_state` field, recoding incorrectly recorded values where applicable, creating a new `unsol_hm` field for unsolved homicides, and then summarizing counts of total and unsolved homicides by city.
 
-```{r hm_summary, message = FALSE}
+```{r hm_summary}
 homicides = read_csv("data/homicide-data.csv") %>%
   mutate(city_state = str_c(city, ", ", state),
          city_state = recode(city_state, "Tulsa, AL" = "Tulsa, OK"), # apparent error in labeling of state
@@ -82,7 +82,7 @@ prop.test(x = balt_unsol,
   select(estimate, starts_with("conf")) 
 ```
 
-Next, we report the estimated proportions of unsolved homicides and corresponding confidence for all cities in the `homicides` dataset.
+Next, we report the estimated proportions of unsolved homicides and corresponding confidence intervals for all cities in the `homicides` dataset.
 
 ```{r hm_all_cities}
 prop_unsol = function(city) {
