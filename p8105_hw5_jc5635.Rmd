@@ -15,7 +15,7 @@ library(patchwork)
 
 We first read and save raw data in a wide-format dataframe (i.e. as `df`), with associated file names and paths included.
 
-```{r long_study_read}
+```{r long_study_read, message = FALSE}
 df = tibble(files = list.files("data/prob_1/"),
             path = str_c("data/prob_1/", files)) %>% 
   mutate(data = map(path, read_csv)) %>% 
@@ -24,7 +24,7 @@ df = tibble(files = list.files("data/prob_1/"),
 
 We proceed to clean, tidy, and transpose the data into long format.
 
-```{r Long_study_tidy}
+```{r long_study_tidy}
 tidy = df %>% 
   mutate(files = str_replace(files, ".csv", ""),
          group = str_sub(files, 1, 3)) %>% 
@@ -49,14 +49,17 @@ Outcomes appear to trend higher over time for participants in the experimental g
 
 ## Problem 2
 
+We import `homicides` data from The Washington Post, consisting of 52,179 records on 12 variables, encompassing fields denoting the identities (e.g. `victim_last`) and characteristics (e.g. `victim_age`) of murder victims, as well as other homicide-related details (e.g. `reported_date`) and case statuses (i.e. `disposition`).
+
+We tidy `homicides` data by concatenating `city` and `state` into a `city_state` field, recoding incorrectly recorded values where relevant, creating a new `unsol_hm` field for unsolved homicides, and then summarizing counts of total and unsolved homicides by city.
+
 ```{r hm_summary, message = FALSE}
 homicides = read_csv("data/homicide-data.csv") %>%
   mutate(city_state = str_c(city, ", ", state),
-         city_state = recode(city_state, "Tulsa, AL" = "Tulsa, OK"),
+         city_state = recode(city_state, "Tulsa, AL" = "Tulsa, OK"), # apparent error in labeling of state
          unsol_hm = ifelse(disposition == "Closed without arrest" | disposition == "Open/No arrest", TRUE, FALSE)
          ) %>%
   relocate(city_state, .after = state) %>%
-  
   group_by(city_state) %>%
   summarise(tot_hm = n_distinct(uid),
         tot_unsol_hm = n_distinct(uid[unsol_hm == TRUE]))
@@ -149,6 +152,8 @@ sim_results %>%
        y = "Proportion of times null is rejected") +
   theme(plot.title = element_text(size = 11))
 ```
+
+As shown in the plot above, statistical power tends to increase as effect sizes become larger.
 
 ```{r sim_plot_ii, fig.width = 9, fig.asp = 0.6}
 est_mu = sim_results %>%
