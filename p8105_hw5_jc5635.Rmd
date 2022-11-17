@@ -76,10 +76,12 @@ balt_unsol = homicides %>%
   filter(city_state == "Baltimore, MD") %>%
   pull(tot_unsol_hm)
 
-prop.test(x = balt_unsol, 
+balt_prop = prop.test(x = balt_unsol, 
           n = balt_tot) %>%
   broom::tidy() %>%
   select(estimate, starts_with("conf")) 
+
+balt_prop
 ```
 
 Next, we report the estimated proportions of unsolved homicides and corresponding confidence intervals for all cities in the `homicides` dataset.
