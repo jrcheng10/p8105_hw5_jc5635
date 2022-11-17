@@ -53,7 +53,7 @@ We import `homicides` data from The Washington Post, consisting of 52,179 record
 
 We tidy `homicides` data by concatenating `city` and `state` into a `city_state` field, recoding incorrectly recorded values where applicable, creating a new `unsol_hm` field for unsolved homicides, and then summarizing counts of total and unsolved homicides by city.
 
-```{r hm_summary, message - FALSE}
+```{r hm_summary, message = FALSE, show_col_types = FALSE}
 homicides = read_csv("data/homicide-data.csv") %>%
   mutate(city_state = str_c(city, ", ", state),
          city_state = recode(city_state, "Tulsa, AL" = "Tulsa, OK"), # apparent error in labeling of state
