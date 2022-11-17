@@ -126,6 +126,8 @@ hm_listcol %>%
 
 ## Problem 3
 
+For a series of true means (i.e. μ = {0,1,2,3,4,5,6}), we generate 5000 observations per mean from the normal distribution, with n = 30 and σ = 5, and report the estimated mean and p-value from a t-test, with a null hypothesis of μ = 0 and α = 0.05.
+
 ```{r sim_data}
 sim = function(n = 30, mu = 0, sigma = 5) {
   
@@ -146,6 +148,8 @@ sim_results =
   mutate(reject_null = ifelse(p.value < 0.05, TRUE, FALSE))
 ```
 
+We first plot the proportion of times the null hypothesis is rejected against true means.
+
 ```{r sim_plot_i, fig.width = 9, fig.asp = 0.6}
 sim_results %>%
   group_by(mean) %>%
@@ -160,6 +164,8 @@ sim_results %>%
 ```
 
 As shown in the plot above, statistical power tends to increase as effect sizes become larger.
+
+We additionally plot both average estimates of μ̂, as well as these estimates where the null hypothesis is rejected, against the true mean.
 
 ```{r sim_plot_ii, fig.width = 9, fig.asp = 0.6}
 est_mu = sim_results %>%
