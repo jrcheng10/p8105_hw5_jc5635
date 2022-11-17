@@ -65,7 +65,9 @@ homicides = read_csv("data/homicide-data.csv") %>%
         tot_unsol_hm = n_distinct(uid[unsol_hm == TRUE]))
 ```
 
-```{r hm_baltimore}
+We report the estimated proportion of unsolved homicides, and corresponding confidence intervals, for Baltimore, MD,  the `prop.test` function t
+
+```{r hm_baltimore, message = FALSE}
 balt_tot = homicides %>%
   filter(city_state == "Baltimore, MD") %>%
   pull(tot_hm)
@@ -181,3 +183,5 @@ est_mu_null_reject = sim_results %>%
 
 est_mu + est_mu_null_reject
 ```
+
+The sample average of μ̂ for tests where the null hypothesis is rejected appears to be somewhat higher than the true mean, since the likelihood of rejecting the null is greater when sample estimates lie farther from the parameter.
